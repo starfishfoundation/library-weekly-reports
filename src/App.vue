@@ -5,7 +5,7 @@ logLabeled("I'm ready!  ⸜(๑'ᵕ'๑)⸝⋆*", "log", "", "color: #66ccff");
 </script>
 
 <template>
-  <div class="font-chinese antialiased">
+  <div class="antialiased">
     <div class="min-h-screen">
       <Navbar />
       <RouterView />
