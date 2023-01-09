@@ -71,6 +71,9 @@ export default {
       title: b.title,
       errors: b.errors,
     }))
+    this.errors.sort((a, b) => {
+      return a.errors.join(' ').localeCompare(b.errors.join(' '))
+    })
   },
 }
 </script>
