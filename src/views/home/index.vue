@@ -1,74 +1,186 @@
 <script setup lang="ts">
-import Papa from "papaparse";
-import { detectBookData } from "~/utils/book";
-import DropFile from "~/components/DropFile.vue";
-import BookClassifier from "./components/BookClassifier.vue";
-import appStore from "~/store";
+import { importBooks, getExistingBookInfo } from '~/db/books'
+import { importTransactions, getExistingTransactionInfo } from '~/db/transactions'
+import { exportReport } from '~/db/exportReport'
+import { ImportError } from '~/utils/errors'
+import { getDate } from '~/utils/time'
+
+import db from '~/db'
+import DropFile from '~/components/DropFile.vue'
+import StepBookImport from './components/StepBookImport.vue'
+import StepTxImport from './components/StepTxImport.vue'
+import StepDateFilter from './components/StepDateFilter.vue'
+import StepExportReport from './components/StepExportReport.vue'
+import appStore from '~/store'
 </script>
 
 <template>
   <div class="main">
-    <DropFile @upload="handleUpload" />
-    <BookClassifier
-      v-if="inputData && inputData.length"
-      :bookIds="activeBookIds" />
-    <button
-      v-if="inputData && inputData.length"
-      class="btn btn-secondary mt-1"
-      @click="finish">
-      Finish
-    </button>
+    <ul class="steps shrink-0 mb-16">
+      <li
+        v-for="(label, stepId) in steps"
+        :key="stepId"
+        @click="() => setStep(stepId)"
+        :class="`
+          step
+          ${isStepActive(stepId) ? 'step-primary' : ''}
+          ${isStepAccessible(stepId) ? 'cursor-pointer' : 'cursor-not-allowed'}
+        `">
+        {{ label }}
+      </li>
+    </ul>
+
+    <template v-if="step === 'bookImport'">
+      <StepBookImport
+        :bookImport="bookImport"
+        :onContinue="finishBooks"
+        :onUpload="handleUploadBooks" />
+    </template>
+
+    <template v-if="step === 'txImport'">
+      <StepTxImport
+        :txImport="txImport"
+        :onContinue="finishTxs"
+        :onUpload="handleUploadTxs" />
+    </template>
+
+    <template v-if="step === 'dateFilter'">
+      <StepDateFilter
+        v-model:dateFrom="dateFilter.from"
+        v-model:dateTo="dateFilter.to"
+        :today="today"
+        :onContinue="handleSubmitDateFilter" />
+    </template>
+
+    <template v-if="step === 'exportReport'">
+      <StepExportReport
+        :report="report"
+        />
+    </template>
   </div>
 </template>
 
 <script lang="ts">
 export default {
   data() {
+    const today = getDate(new Date())
+
     return {
-      inputData: null,
-      activeBookIds: [],
+      steps: {
+        bookImport: 'Upload books',
+        txImport: 'Upload transactions',
+        dateFilter: 'Select dates',
+        exportReport: 'Finish',
+      },
+      step: 'bookImport',
+      bookImport: {
+        status: '',
+        last: null,
+      },
+      txImport: {
+        status: '',
+        errors: null,
+        last: null,
+      },
+      today: today,
+      dateFilter: {
+        from: '',
+        to: today,
+      },
+      report: null,
     };
   },
+  async mounted() {
+    window.dbConn = await db.getInstance()
+    this.bookImport.last = await getExistingBookInfo()
+    this.txImport.last = await getExistingTransactionInfo()
+  },
   methods: {
-    handleUpload(file) {
-      this.inputData = null
+    isStepAccessible(step) {
+      switch (step) {
+        case 'bookImport':
+          return true
+        case 'txImport':
+          return this.bookImport.status === 'success'
+        case 'dateFilter':
+          return this.bookImport.status === 'success' && this.txImport.status === 'success'
+        case 'exportReport':
+          return (
+            this.bookImport.status === 'success'
+            && this.txImport.status === 'success'
+            && this.dateFilter.from
+            && this.dateFilter.to
+          )
+      }
+
+      return false
+    },
+    isStepActive(step) {
+      return Object.keys(this.steps).indexOf(step) <= Object.keys(this.steps).indexOf(this.step)
+    },
+    setStep(step) {
+      if (this.isStepAccessible(step)) {
+        this.step = step
+      }
+    },
+    handleUploadBooks(file) {
+      this.bookImport.status = 'loading'
       if (!file) {
         return
       }
 
       const reader = new FileReader()
-      reader.addEventListener('load', () => {
-        this.inputData = Papa.parse(reader.result, {
-          header: true,
-          skipEmptyLines: true,
-        }).data
-
-        const bookIds = new Set()
-        for (const entry of this.inputData) {
-          const key = entry['Item #']
-          bookIds.add(key)
-          if (!appStore.books.books[key]) {
-            appStore.books.updateBook(key, {
-              'Item #': entry['Item #'],
-              'Item Title': entry['Item Title'],
-              'Item Author': entry['Item Author'],
-              'Item Barcode': entry['Item Barcode'],
-              ...detectBookData(entry['Item Title']),
-            })
-          }
-        }
-
-        const toSortBookIds = [...bookIds]
-        toSortBookIds.sort((a, b) => {
-          const updA = appStore.books.books[a]?.updatedAt || Number.POSITIVE_INFINITY
-          const updB = appStore.books.books[b]?.updatedAt || Number.POSITIVE_INFINITY
-          return updB - updA
+      reader.addEventListener('load', async () => {
+        await importBooks(reader.result, {
+          lastModified: new Date(file.lastModified),
+          onError: () => true,
         })
-        this.activeBookIds = toSortBookIds
+        // refresh last import so if we back to the step, we see updated info
+        this.bookImport.last = await getExistingBookInfo()
+        this.finishBooks()
       })
       reader.readAsText(file)
     },
-    finish() {
+    async finishBooks() {
+      const conn = await db.getInstance()
+      const books = await conn.select({
+        from: 'Book',
+      })
+      if (books.some(b => b.errors.length)) {
+        this.bookImport.status = 'error'
+      } else {
+        this.bookImport.status = 'success'
+        this.setStep('txImport')
+      }
+    },
+    handleUploadTxs(file) {
+      this.txImport.status = 'loading'
+      if (!file) {
+        return
+      }
+
+      const reader = new FileReader()
+      reader.addEventListener('load', async () => {
+        await importTransactions(reader.result, {
+          lastModified: new Date(file.lastModified),
+        })
+        // refresh last import so if we back to the step, we see updated info
+        this.txImport.last = await getExistingTransactionInfo()
+        this.finishTxs()
+      })
+      reader.readAsText(file)
+    },
+    finishTxs() {
+      this.txImport.status = 'success'
+      this.setStep('dateFilter')
+    },
+    async handleSubmitDateFilter() {
+      this.report = await exportReport({
+        dateFrom: new Date(this.dateFilter.from),
+        dateTo: new Date(this.dateFilter.to),
+      })
+
+      this.setStep('exportReport')
     },
   },
 };

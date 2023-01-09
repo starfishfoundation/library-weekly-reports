@@ -29,6 +29,7 @@
   "dependencies": {
     "@vueuse/core": "^9.8.1",
     "daisyui": "^2.46.0",
+    "jsstore": "^4.5.0",
     "nprogress": "^0.2.0",
     "papaparse": "^5.3.2",
     "pinia": "^2.0.28",
@@ -39,6 +40,7 @@
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
     "@iconify-json/carbon": "^1.1.11",
+    "@iconify-json/material-symbols": "^1.1.26",
     "@iconify-json/mdi": "^1.1.39",
     "@iconify-json/tabler": "^1.1.52",
     "@intlify/unplugin-vue-i18n": "^0.8.1",

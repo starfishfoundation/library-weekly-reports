@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import IconMenu from '~icons/material-symbols/menu'
+import db from '~/db'
 </script>
 
 <template>
@@ -21,7 +23,29 @@
             <span class="text-base-content">R<span class="lowercase">eports</span></span>
           </div>
         </router-link>
+        <div class="ml-auto dropdown dropdown-end">
+          <label tabindex="0" class="btn m-1">
+            <IconMenu />
+          </label>
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li>
+              <a @click="dropDatabase" class="text-red-400">Delete all data</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
   </div>
 </template>
+
+<script lang="ts">
+export default {
+  methods: {
+    async dropDatabase() {
+      const conn = await db.getInstance()
+      await conn.dropDb()
+      window.location.reload()
+    },
+  },
+}
+</script>

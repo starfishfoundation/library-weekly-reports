@@ -4,17 +4,6 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        "chinese": [
-          "Helvetica Neue",
-          "Helvetica",
-          "Arial",
-          "Microsoft Yahei",
-          "Hiragino Sans GB",
-          "Heiti SC",
-          "WenQuanYi Micro Hei",
-          "sans-serif",
-        ],
-        // 黑体
         "helvetica": [
           "-apple-system",
           "Noto Sans",
@@ -36,7 +25,6 @@ module.exports = {
           "WenQuanYi Zen Hei Sharp",
           "sans-serif",
         ],
-        // 楷体
         "italics": [
           "Baskerville",
           "Georgia",
@@ -52,40 +40,6 @@ module.exports = {
           "KaiTi_GB2312",
           "DFKai-SB",
           "TW-Kai",
-          "serif",
-        ],
-        // 宋体
-        "song": [
-          "Georgia",
-          "Nimbus Roman No9 L",
-          "Songti SC",
-          "Noto Serif CJK SC",
-          "Source Han Serif SC",
-          "Source Han Serif CN",
-          "STSong",
-          "AR PL New Sung",
-          "AR PL SungtiL GB",
-          "NSimSun",
-          "SimSun",
-          "TW-Sung",
-          "WenQuanYi Bitmap Song",
-          "AR PL UMing CN",
-          "AR PL UMing HK",
-          "AR PL UMing TW",
-          "AR PL UMing TW MBE",
-          "PMingLiU",
-          "MingLiU",
-          "serif",
-        ],
-        // 仿宋体
-        "imitation-song": [
-          "Baskerville",
-          "Times New Roman",
-          "Liberation Serif",
-          "STFangsong",
-          "FangSong",
-          "FangSong_GB2312",
-          "CWTEX-F",
           "serif",
         ],
       },
