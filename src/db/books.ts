@@ -11,6 +11,23 @@ interface ImportParams {
   onError: (err: ImportError) => boolean
 }
 
+type Mapping = {[key: string]: string[]}
+
+function normalizeMapping(mapping: Mapping): Mapping {
+  return Object.fromEntries(Object.entries(mapping).map(([key, vals]) => {
+    return [key, vals.map(v => v.toLowerCase())]
+  }))
+}
+
+function searchMapping(mapping: Mapping, query: string): string | null {
+  for (const [value, queries] of Object.entries(mapping)) {
+    if (queries.includes(query)) {
+      return value
+    }
+  }
+  return null
+}
+
 export async function parseBooks(file, opts: ParseOptions) {
   let data = JSON.parse(file)
 
@@ -20,32 +37,45 @@ export async function parseBooks(file, opts: ParseOptions) {
 
   const getLanguage = entry => {
     let err
-    const values = ['Farsi', 'Arabic', 'Somali', 'French', 'English', 'German', 'Greek', 'Other']
-    for (const tag of entry.tags || []) {
-      if (values.includes(tag)) {
-        if (entry.language?.[0] && tag !== entry.language[0]) {
-          err = new ImportError(
-            `Language says "${entry.language[0]}" but tags say "${tag}"`,
-            {
-              level: 'error',
-              bookId: entry.books_id,
-              title: entry.title,
-            }
-          )
-          opts.onError(err)
-          entry.errors.push(err.serialize())
-        }
+    const mapping = normalizeMapping({
+      'Farsi': ['Farsi', 'Farsi kids fiction', 'Farsi adults fiction', 'Persian', 'Dari', 'Pashto'],
+      'Arabic': ['Arabic'],
+      'Somali': ['Somali'],
+      'French': ['French'],
+      'English': ['English'],
+      'German': ['German'],
+      'Greek': ['Greek'],
+      'Other': ['Other'],
+    })
 
-        return tag
+    let language = entry.language?.[0]
+    language = language ? searchMapping(mapping, language) : null
+
+    for (const tag of entry.tags || []) {
+      const m = searchMapping(mapping, tag)
+      if (!m) {
+        continue
       }
+
+      if (language && m !== language) {
+        err = new ImportError(
+          `Language says "${language}" but tags say "${m}"`,
+          {
+            level: 'error',
+            bookId: entry.books_id,
+            title: entry.title,
+          }
+        )
+        opts.onError(err)
+        entry.errors.push(err.serialize())
+      }
+
+      return m
     }
 
     if (entry.language?.[0]) {
-      if (!values.includes(entry.language[0])) {
-        return 'Other'
-      }
-
-      return entry.language[0]
+      // if language field was set, return match from mapping or 'Other' as fallback
+      return language || 'Other'
     }
 
     err = new ImportError('No language found', {
@@ -60,22 +90,26 @@ export async function parseBooks(file, opts: ParseOptions) {
 
   const getAudience = entry => {
     let err
-    const values = ['Adults', 'Kids']
-    const mapping = {
-      Adults: ['Adults', 'Adult'],
-      Kids: ['Kids', 'Teen'],
-    }
+    const mapping = normalizeMapping({
+      Adults: ['Adults', 'Adult', 'Adults fiction'],
+      Kids: ['Kids', 'Teen', 'Farsi kids fiction'],
+    })
 
     for (const tag of entry.tags || []) {
-      for (const [value, queries] of Object.entries(mapping)) {
-        if (queries.includes(tag)) {
-          return value
-        }
+      const m = searchMapping(mapping, tag)
+      if (m) {
+        return m
       }
     }
 
-    if ((entry.tags || []).includes('Dictionary')) {
-      return 'Adults'
+    const secondaryMapping = normalizeMapping({
+      Adults: ['Dictionary'],
+    })
+    for (const tag of entry.tags || []) {
+      const m = searchMapping(secondaryMapping, tag)
+      if (m) {
+        return m
+      }
     }
 
     err = new ImportError('No audience found, falling back to "Adults"', {
@@ -90,19 +124,17 @@ export async function parseBooks(file, opts: ParseOptions) {
 
   const getTopic = entry => {
     let err
-    const values = ['Fiction', 'Non fiction', 'Educational/sciences', 'Languages']
-    const mapping = {
-      'Fiction': ['Fiction'],
-      'Non fiction': ['Non fiction'],
-      'Educational/sciences': ['Educational/sciences'],
-      'Languages': ['Languages', 'Language Learning', 'Dictionary'],
-    }
+    const mapping = normalizeMapping({
+      'Fiction': ['Fiction', 'Farsi kids fiction', 'Adults Fiction', 'Crime Fiction'],
+      'Non fiction': ['Non fiction', 'Health & Fitness', 'Travel', 'Cooking', 'Poetry'],
+      'Educational/sciences': ['Educational/sciences', 'Science', 'Education', 'Geography', 'Nature', 'History', 'Academic', 'Culture', 'Animals', 'Encyclopedia', 'Art', 'Creative', 'Religion', 'Handicrafts'],
+      'Languages': ['Languages', 'Language Learning', 'Dictionary', 'English Readers'],
+    })
 
     for (const tag of entry.tags || []) {
-      for (const [value, queries] of Object.entries(mapping)) {
-        if (queries.includes(tag)) {
-          return value
-        }
+      const m = searchMapping(mapping, tag)
+      if (m) {
+        return m
       }
     }
 
