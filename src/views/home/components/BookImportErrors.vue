@@ -72,7 +72,7 @@ export default {
       errors: b.errors,
     }))
     this.errors.sort((a, b) => {
-      return a.errors.join(' ').localeCompare(b.errors.join(' '))
+      return a.errors.map(e => e.message).join(' ').localeCompare(b.errors.map(e => e.message).join(' '))
     })
   },
 }
