@@ -20,6 +20,7 @@ function normalizeMapping(mapping: Mapping): Mapping {
 }
 
 function searchMapping(mapping: Mapping, query: string): string | null {
+  query = query.toLowerCase()
   for (const [value, queries] of Object.entries(mapping)) {
     if (queries.includes(query)) {
       return value
