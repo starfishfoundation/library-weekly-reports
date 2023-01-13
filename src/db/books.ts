@@ -46,6 +46,7 @@ export async function parseBooks(file, opts: ParseOptions) {
       'English': ['English'],
       'German': ['German'],
       'Greek': ['Greek'],
+      'Amharic': ['Amharic'],
       'Other': ['Other'],
     })
 
