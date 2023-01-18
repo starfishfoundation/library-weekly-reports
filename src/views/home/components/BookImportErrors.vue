@@ -12,9 +12,6 @@ import db from '~/db'
       Errors when importing books
     </h3>
     {{ errors.length }} errors found
-    <template v-if="errors.length > 100">
-    , showing only first 1000.
-    </template>
   </div>
   <table class="table table-compact table-zebra mt-4">
     <thead>
@@ -26,8 +23,8 @@ import db from '~/db'
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(item, index) in errors.slice(0, 1000)" :key="item.bookId">
-        <td>{{ index + 1 }}</td>
+      <tr v-for="(item, index) in errorsPage" :key="item.bookId">
+        <td>{{ currentPage * pageSize + index + 1 }}</td>
         <td v-html="item.title"></td>
         <td>
           <div v-for="err in item.errors" class="flex mb-2 last:mb-0">
@@ -52,6 +49,15 @@ import db from '~/db'
       </tr>
     </tbody>
   </table>
+  <div class="btn-group my-6">
+    <button
+      v-for="p in [...Array(Math.ceil(errors.length / pageSize))].keys()"
+      :key="p"
+      :class="`btn ${p === currentPage ? 'btn-active' : ''}`"
+      @click="() => currentPage = p">
+      {{ p + 1 }}
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -59,6 +65,8 @@ export default {
   data() {
     return {
       errors: [],
+      pageSize: 400,
+      currentPage: 0,
     }
   },
   async mounted() {
@@ -74,6 +82,14 @@ export default {
     this.errors.sort((a, b) => {
       return a.errors.map(e => e.message).join(' ').localeCompare(b.errors.map(e => e.message).join(' '))
     })
+  },
+  computed: {
+    errorsPage() {
+      return this.errors.slice(
+        this.currentPage * this.pageSize,
+        (this.currentPage + 1) * this.pageSize
+      )
+    },
   },
 }
 </script>
