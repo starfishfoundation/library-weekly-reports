@@ -163,18 +163,21 @@ export async function parseBooks(file, opts: ParseOptions) {
     return 'Other'
   }
 
-  data = Object.values(data).map(entry => {
-    entry.errors = []
+  data = Object.values(data)
+    // ignore board games
+    .filter(entry => !(entry.tags || []).includes('Board game'))
+    .map(entry => {
+      entry.errors = []
 
-    return {
-      id: entry.books_id,
-      title: entry.title,
-      language: getLanguage(entry),
-      audience: getAudience(entry),
-      topic: getTopic(entry),
-      errors: entry.errors,
-    }
-  })
+      return {
+        id: entry.books_id,
+        title: entry.title,
+        language: getLanguage(entry),
+        audience: getAudience(entry),
+        topic: getTopic(entry),
+        errors: entry.errors,
+      }
+    })
 
   return data
 }
