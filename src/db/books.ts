@@ -53,7 +53,20 @@ export async function parseBooks(file, opts: ParseOptions) {
     let language = entry.language?.[0]
     language = language ? searchMapping(mapping, language) : null
 
-    for (const tag of entry.tags || []) {
+    let tags: string[] = entry.tags || []
+    // has English in tags and also some other language
+    const isMultilingualEnglish =
+      tags.map(t => t.toLowerCase()).includes('English'.toLowerCase())
+      && tags.some(t => {
+        const m = searchMapping(mapping, t)
+        return m && m !== 'English'
+      })
+
+    if (isMultilingualEnglish) {
+      tags = tags.filter(t => t.toLowerCase() !== 'English'.toLowerCase())
+    }
+
+    for (const tag of tags) {
       const m = searchMapping(mapping, tag)
       if (!m) {
         continue
