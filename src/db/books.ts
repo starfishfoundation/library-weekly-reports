@@ -141,7 +141,7 @@ export async function parseBooks(file, opts: ParseOptions) {
     let err
     const mapping = normalizeMapping({
       'Fiction': ['Fiction', 'Farsi kids fiction', 'Adults Fiction', 'Crime Fiction'],
-      'Non fiction': ['Non fiction', 'Health & Fitness', 'Travel', 'Cooking', 'Poetry'],
+      'Non fiction': ['Non fiction', 'Health & Fitness', 'Travel', 'Cooking', 'Poetry', 'Magazine'],
       'Educational/sciences': ['Educational/sciences', 'Science', 'Education', 'Geography', 'Nature', 'History', 'Academic', 'Culture', 'Animals', 'Encyclopedia', 'Art', 'Creative', 'Religion', 'Handicrafts'],
       'Languages': ['Languages', 'Language Learning', 'Dictionary', 'English Readers'],
     })
