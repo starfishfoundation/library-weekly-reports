@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import IconBook from '~icons/material-symbols/library-books'
 import IconUpdated from '~icons/material-symbols/update-rounded'
+import IconBulb from '~icons/material-symbols/lightbulb'
 
 import { getDateTime } from '~/utils/time'
 import BookImportErrors from './BookImportErrors.vue'
@@ -40,7 +41,8 @@ import BookImportErrors from './BookImportErrors.vue'
         Upload book database (JSON)
       </h2>
       <DropFile @upload="onUpload" />
-      <p class="mt-2">
+      <p class="mt-4 text-orange-400 font-light">
+        <IconBulb />
         Get export of books from LibraryThing
         <a
           class="link link-primary"

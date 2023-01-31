@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import IconExchange from '~icons/material-symbols/compare-arrows'
 import IconUpdated from '~icons/material-symbols/update-rounded'
+import IconBulb from '~icons/material-symbols/lightbulb'
 
 import { getDateTime } from '~/utils/time'
 </script>
@@ -39,7 +40,8 @@ import { getDateTime } from '~/utils/time'
         Upload transactions (CSV)
       </h2>
       <DropFile @upload="onUpload" />
-      <p class="mt-2">
+      <p class="mt-4 text-orange-400 font-light">
+        <IconBulb />
         Get export of transactions from LibraryCat
         <a
           class="link link-primary"
