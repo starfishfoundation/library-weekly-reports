@@ -165,7 +165,10 @@ export async function parseBooks(file, opts: ParseOptions) {
 
   data = Object.values(data)
     // ignore board games
-    .filter(entry => !(entry.tags || []).includes('Board game'))
+    .filter(entry => {
+      const tags = entry.tags || []
+      return !tags.includes('Board game') && !tags.includes('Cards')
+    })
     .map(entry => {
       entry.errors = []
 
