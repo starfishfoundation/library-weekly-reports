@@ -39,6 +39,14 @@ import { getDateTime } from '~/utils/time'
         Upload transactions (CSV)
       </h2>
       <DropFile @upload="onUpload" />
+      <p class="mt-2">
+        Get export of transactions from LibraryCat
+        <a
+          class="link link-primary"
+          href="https://www.librarycat.org/admin/transactions"
+          target="_blank"
+          rel="noopener noreferrer">here</a>.
+      </p>
       <template v-if="txImport.status === 'loading'">
         <div class="radial-progress animate-spin text-gray-300 mt-4" style="--value:90;"></div>
       </template>

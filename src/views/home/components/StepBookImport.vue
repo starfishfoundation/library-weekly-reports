@@ -40,6 +40,14 @@ import BookImportErrors from './BookImportErrors.vue'
         Upload book database (JSON)
       </h2>
       <DropFile @upload="onUpload" />
+      <p class="mt-2">
+        Get export of books from LibraryThing
+        <a
+          class="link link-primary"
+          href="https://www.librarything.com/export.php?export_type=json"
+          target="_blank"
+          rel="noopener noreferrer">here</a>.
+      </p>
       <template v-if="bookImport.status === 'loading'">
         <div class="radial-progress animate-spin text-gray-300 mt-4" style="--value:90;"></div>
       </template>
