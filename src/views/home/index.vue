@@ -33,8 +33,9 @@ import appStore from '~/store'
     <template v-if="step === 'bookImport'">
       <StepBookImport
         :bookImport="bookImport"
-        :onContinue="finishBooks"
-        :onUpload="handleUploadBooks" />
+        :onImportLatest="finishBooks"
+        :onUpload="handleUploadBooks"
+        :onContinue="() => setStep('txImport', true)" />
     </template>
 
     <template v-if="step === 'txImport'">
@@ -118,10 +119,12 @@ export default {
     isStepActive(step) {
       return Object.keys(this.steps).indexOf(step) <= Object.keys(this.steps).indexOf(this.step)
     },
-    setStep(step) {
-      if (this.isStepAccessible(step)) {
-        this.step = step
+    setStep(step, force = false) {
+      if (!force && !this.isStepAccessible(step)) {
+        return
       }
+
+      this.step = step
     },
     handleUploadBooks(file) {
       this.bookImport.status = 'loading'

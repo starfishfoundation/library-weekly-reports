@@ -26,9 +26,9 @@ import BookImportErrors from './BookImportErrors.vue'
             </span>
             <div class="card-actions justify-center">
               <button
-                @click="onContinue"
+                @click="onImportLatest"
                 class="btn btn-sm btn-outline btn-secondary mt-2">
-                Continue
+                Import
               </button>
             </div>
           </div>
@@ -56,12 +56,12 @@ import BookImportErrors from './BookImportErrors.vue'
     </div>
   </div>
   <div v-if="bookImport.status === 'error'" class="place-items-center">
-    <BookImportErrors :key="bookImport.status" />
+    <BookImportErrors :key="bookImport.status" @continue="onContinue" />
   </div>
 </template>
 
 <script lang="ts">
 export default {
-  props: ['bookImport', 'onContinue', 'onUpload'],
+  props: ['bookImport', 'onImportLatest', 'onUpload', 'onContinue'],
 }
 </script>
