@@ -42,8 +42,6 @@ import { getDateTime } from '~/utils/time'
       <h2 class="mb-4 text-xl font-bold">
         Upload transactions (CSV)
       </h2>
-        <br />
-        (make sure to select "<strong class="font-bold">All</strong>" from the left sidebar!)
       <DropFile @upload="onUpload" />
       <p class="mt-4 font-light text-orange-400">
         <IconBulb />
@@ -54,6 +52,8 @@ import { getDateTime } from '~/utils/time'
           target="_blank"
           rel="noopener noreferrer"
         >here</a>.
+        <br>
+        (make sure to select "<strong class="font-bold">All</strong>" from the left sidebar!)
       </p>
       <template v-if="txImport.status === 'loading'">
         <div class="radial-progress mt-4 animate-spin text-gray-300" style="--value:90;" />
