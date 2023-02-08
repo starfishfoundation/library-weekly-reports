@@ -9,8 +9,8 @@ import { getDateTime } from '~/utils/time'
 <template>
   <div class="flex gap-4">
     <template v-if="txImport.last">
-      <div class="flex-grow shrink-0">
-        <h2 class="text-xl font-bold mb-4">
+      <div class="shrink-0 grow">
+        <h2 class="mb-4 text-xl font-bold">
           Use latest import
         </h2>
         <div class="card mx-auto w-96 bg-gray-700 text-slate-300 shadow-xl">
@@ -25,32 +25,36 @@ import { getDateTime } from '~/utils/time'
             </span>
             <div class="card-actions justify-center">
               <button
+                class="btn-outline btn-secondary btn-sm btn mt-2"
                 @click="onImportLatest"
-                class="btn btn-sm btn-outline btn-secondary mt-2">
+              >
                 Import
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="divider divider-horizontal">OR</div>
+      <div class="divider divider-horizontal">
+        OR
+      </div>
     </template>
-    <div class="flex-grow shrink-0">
-      <h2 class="text-xl font-bold mb-4">
+    <div class="shrink-0 grow">
+      <h2 class="mb-4 text-xl font-bold">
         Upload transactions (CSV)
       </h2>
       <DropFile @upload="onUpload" />
-      <p class="mt-4 text-orange-400 font-light">
+      <p class="mt-4 font-light text-orange-400">
         <IconBulb />
         Get export of transactions from LibraryCat
         <a
-          class="link link-primary"
+          class="link-primary link"
           href="https://www.librarycat.org/admin/transactions"
           target="_blank"
-          rel="noopener noreferrer">here</a>.
+          rel="noopener noreferrer"
+        >here</a>.
       </p>
       <template v-if="txImport.status === 'loading'">
-        <div class="radial-progress animate-spin text-gray-300 mt-4" style="--value:90;"></div>
+        <div class="radial-progress mt-4 animate-spin text-gray-300" style="--value:90;" />
       </template>
     </div>
   </div>
