@@ -1,48 +1,51 @@
 <script setup lang="ts">
-import { importBooks, getExistingBookInfo } from '~/db/books'
-import { importTransactions, getExistingTransactionInfo } from '~/db/transactions'
+import StepBookImport from './components/StepBookImport.vue'
+import StepTxImport from './components/StepTxImport.vue'
+import StepDateFilter from './components/StepDateFilter.vue'
+import StepExportReport from './components/StepExportReport.vue'
+import { getExistingBookInfo, importBooks } from '~/db/books'
+import { getExistingTransactionInfo, importTransactions } from '~/db/transactions'
 import { exportReport } from '~/db/exportReport'
 import { ImportError } from '~/utils/errors'
 import { getDate } from '~/utils/time'
 
 import db from '~/db'
 import DropFile from '~/components/DropFile.vue'
-import StepBookImport from './components/StepBookImport.vue'
-import StepTxImport from './components/StepTxImport.vue'
-import StepDateFilter from './components/StepDateFilter.vue'
-import StepExportReport from './components/StepExportReport.vue'
 import appStore from '~/store'
 </script>
 
 <template>
   <div class="main">
-    <ul class="steps shrink-0 mb-16">
+    <ul class="steps mb-16 shrink-0">
       <li
         v-for="(label, stepId) in steps"
         :key="stepId"
-        @click="() => setStep(stepId)"
         :class="`
           step
           ${isStepActive(stepId) ? 'step-primary' : ''}
           ${isStepAccessible(stepId) ? 'cursor-pointer' : 'cursor-not-allowed'}
-        `">
+        `"
+        @click="() => setStep(stepId)"
+      >
         {{ label }}
       </li>
     </ul>
 
     <template v-if="step === 'bookImport'">
       <StepBookImport
-        :bookImport="bookImport"
-        :onImportLatest="finishBooks"
-        :onUpload="handleUploadBooks"
-        :onContinue="() => finishBooks(true)" />
+        :book-import="bookImport"
+        :on-import-latest="() => finishBooks(false)"
+        :on-upload="handleUploadBooks"
+        :on-continue="() => finishBooks(true)"
+      />
     </template>
 
     <template v-if="step === 'txImport'">
       <StepTxImport
-        :txImport="txImport"
-        :onImportLatest="finishTxs"
-        :onUpload="handleUploadTxs" />
+        :tx-import="txImport"
+        :on-import-latest="finishTxs"
+        :on-upload="handleUploadTxs"
+      />
     </template>
 
     <template v-if="step === 'dateFilter'">
@@ -50,13 +53,14 @@ import appStore from '~/store'
         v-model:dateFrom="dateFilter.from"
         v-model:dateTo="dateFilter.to"
         :today="today"
-        :onContinue="handleSubmitDateFilter" />
+        :on-continue="handleSubmitDateFilter"
+      />
     </template>
 
     <template v-if="step === 'exportReport'">
       <StepExportReport
         :report="report"
-        />
+      />
     </template>
   </div>
 </template>
@@ -83,13 +87,13 @@ export default {
         errors: null,
         last: null,
       },
-      today: today,
+      today,
       dateFilter: {
         from: '',
         to: today,
       },
       report: null,
-    };
+    }
   },
   async mounted() {
     window.dbConn = await db.getInstance()
@@ -149,7 +153,7 @@ export default {
       const books = await conn.select({
         from: 'Book',
       })
-      if (force || !books.some(b => b.errors.length)) {
+      if (force || books.every(b => !b.errors.length)) {
         this.bookImport.status = 'success'
         this.setStep('txImport')
       } else {
@@ -186,7 +190,7 @@ export default {
       this.setStep('exportReport')
     },
   },
-};
+}
 </script>
 
 <style scoped></style>
