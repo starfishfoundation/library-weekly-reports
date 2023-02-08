@@ -52,7 +52,10 @@ export function prepareQuery(params: ReportParams) {
     join: {
       with: 'Book',
       on: 'Book.id=Transaction.bookId',
-      as: { id: 'bookId' },
+      as: {
+        id: 'bookId',
+        errors: 'bookErrors',
+      },
     },
     where: {
       entryDate: {
@@ -135,8 +138,6 @@ export function prepareReport(params: ReportParams, data) {
     // go to next date
     date = getDate(getNextDate(date))
   }
-
-  console.log(dayReports)
 
   // Step 4: Convert to cells
   const cells: any[] = []
