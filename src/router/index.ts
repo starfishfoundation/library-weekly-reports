@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
 ];
 
 const index = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
 index.beforeEach(() => {
