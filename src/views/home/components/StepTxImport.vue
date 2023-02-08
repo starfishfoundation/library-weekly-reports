@@ -13,7 +13,7 @@ import { getDateTime } from '~/utils/time'
         <h2 class="text-xl font-bold mb-4">
           Use latest import
         </h2>
-        <div class="card w-96 bg-gray-700 shadow-xl">
+        <div class="card mx-auto w-96 bg-gray-700 shadow-xl">
           <div class="card-body p-6 text-left">
             <span>
               <IconExchange class="inline-block" />
@@ -25,9 +25,9 @@ import { getDateTime } from '~/utils/time'
             </span>
             <div class="card-actions justify-center">
               <button
-                @click="onContinue"
+                @click="onImportLatest"
                 class="btn btn-sm btn-outline btn-secondary mt-2">
-                Continue
+                Import
               </button>
             </div>
           </div>
@@ -58,6 +58,6 @@ import { getDateTime } from '~/utils/time'
 
 <script lang="ts">
 export default {
-  props: ['txImport', 'onContinue', 'onUpload'],
+  props: ['txImport', 'onImportLatest', 'onUpload'],
 }
 </script>

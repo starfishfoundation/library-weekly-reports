@@ -35,13 +35,13 @@ import appStore from '~/store'
         :bookImport="bookImport"
         :onImportLatest="finishBooks"
         :onUpload="handleUploadBooks"
-        :onContinue="() => setStep('txImport', true)" />
+        :onContinue="() => finishBooks(true)" />
     </template>
 
     <template v-if="step === 'txImport'">
       <StepTxImport
         :txImport="txImport"
-        :onContinue="finishTxs"
+        :onImportLatest="finishTxs"
         :onUpload="handleUploadTxs" />
     </template>
 
@@ -119,8 +119,8 @@ export default {
     isStepActive(step) {
       return Object.keys(this.steps).indexOf(step) <= Object.keys(this.steps).indexOf(this.step)
     },
-    setStep(step, force = false) {
-      if (!force && !this.isStepAccessible(step)) {
+    setStep(step) {
+      if (!this.isStepAccessible(step)) {
         return
       }
 
@@ -144,16 +144,16 @@ export default {
       })
       reader.readAsText(file)
     },
-    async finishBooks() {
+    async finishBooks(force = false) {
       const conn = await db.getInstance()
       const books = await conn.select({
         from: 'Book',
       })
-      if (books.some(b => b.errors.length)) {
-        this.bookImport.status = 'error'
-      } else {
+      if (force || !books.some(b => b.errors.length)) {
         this.bookImport.status = 'success'
         this.setStep('txImport')
+      } else {
+        this.bookImport.status = 'error'
       }
     },
     handleUploadTxs(file) {
@@ -173,7 +173,7 @@ export default {
       })
       reader.readAsText(file)
     },
-    finishTxs() {
+    finishTxs(force = false) {
       this.txImport.status = 'success'
       this.setStep('dateFilter')
     },
