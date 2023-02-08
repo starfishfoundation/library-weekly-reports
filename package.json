@@ -24,7 +24,8 @@
     "test:unit": "vitest",
     "test:coverage": "vitest run --coverage",
     "prepare": "husky install",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "deploy": "node scripts/gh-pages-deploy.js"
   },
   "dependencies": {
     "@vueuse/core": "^9.8.1",
