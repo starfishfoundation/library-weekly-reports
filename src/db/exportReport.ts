@@ -98,20 +98,23 @@ export function prepareReport(params: ReportParams, data) {
       }
       v.status[entry.status]++
 
-      if (typeof v.language[entry.language] === 'undefined') {
-        v.language[entry.language] = 0
-      }
-      v.language[entry.language]++
+      if (entry.status === 'Checked out') {
+        // further stats are only for check-outs
+        if (typeof v.language[entry.language] === 'undefined') {
+          v.language[entry.language] = 0
+        }
+        v.language[entry.language]++
 
-      if (typeof v.audience[entry.audience] === 'undefined') {
-        v.audience[entry.audience] = 0
-      }
-      v.audience[entry.audience]++
+        if (typeof v.audience[entry.audience] === 'undefined') {
+          v.audience[entry.audience] = 0
+        }
+        v.audience[entry.audience]++
 
-      if (typeof v.topic[entry.topic] === 'undefined') {
-        v.topic[entry.topic] = 0
+        if (typeof v.topic[entry.topic] === 'undefined') {
+          v.topic[entry.topic] = 0
+        }
+        v.topic[entry.topic]++
       }
-      v.topic[entry.topic]++
     })
   }
 
