@@ -30,6 +30,7 @@ const defaultDayReport: Partial<DayReport> = {
     'English': 0,
     'German': 0,
     'Greek': 0,
+    'Amharic': 0,
     'Other': 0,
   },
   audience: {
@@ -147,7 +148,7 @@ export function prepareReport(params: ReportParams, data) {
   dayReports.forEach(dr => {
     const d = new Date(dr.date)
     if (getWeekDay(dr) < prevWeekDay) {
-      cells.push(Array(34).fill(''))
+      cells.push(Array(35).fill(''))
     }
 
     if (dr.entries.length) {
@@ -172,6 +173,7 @@ export function prepareReport(params: ReportParams, data) {
         dr.language.English || 0,
         dr.language.German || 0,
         dr.language.Greek || 0,
+        dr.language.Amharic || 0,
         dr.language.Other || 0,
         '',
         '',
@@ -192,37 +194,7 @@ export function prepareReport(params: ReportParams, data) {
         getDateExcelFormat(d),
         getDayName(d),
         0,
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
+        ...Array(32).fill(''),
       ])
     }
 
