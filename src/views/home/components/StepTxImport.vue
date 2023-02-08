@@ -42,6 +42,8 @@ import { getDateTime } from '~/utils/time'
       <h2 class="mb-4 text-xl font-bold">
         Upload transactions (CSV)
       </h2>
+        <br />
+        (make sure to select "<strong class="font-bold">All</strong>" from the left sidebar!)
       <DropFile @upload="onUpload" />
       <p class="mt-4 font-light text-orange-400">
         <IconBulb />
