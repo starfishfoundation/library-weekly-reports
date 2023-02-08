@@ -7,18 +7,10 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    Components: typeof import('./../src/components/layout/Navbar/components/index.vue')['default']
     DropFile: typeof import('./../src/components/DropFile.vue')['default']
     Footer: typeof import('./../src/components/layout/Footer/index.vue')['default']
-    IMdiGithub: typeof import('~icons/mdi/github')['default']
-    ITablerBrandGithub: typeof import('~icons/tabler/brand-github')['default']
-    ITablerChevronDown: typeof import('~icons/tabler/chevron-down')['default']
-    ITablerColorSwatch: typeof import('~icons/tabler/color-swatch')['default']
-    ITablerLanguage: typeof import('~icons/tabler/language')['default']
-    LocalesChange: typeof import('./../src/components/layout/Navbar/components/LocalesChange/index.vue')['default']
     Navbar: typeof import('./../src/components/layout/Navbar/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    ThemeChange: typeof import('./../src/components/layout/Navbar/components/ThemeChange/index.vue')['default']
   }
 }
