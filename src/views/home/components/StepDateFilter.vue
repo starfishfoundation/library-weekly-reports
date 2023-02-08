@@ -1,5 +1,12 @@
+<script lang="ts">
+export default {
+  props: ['dateFrom', 'dateTo', 'today', 'onContinue'],
+  emits: ['update:dateFrom', 'update:dateTo'],
+}
+</script>
+
 <template>
-  <h2 class="text-xl font-bold mb-4">
+  <h2 class="mb-4 text-xl font-bold">
     Select date range for report
   </h2>
   <form @submit.prevent="onContinue">
@@ -10,10 +17,11 @@
         </label>
         <input
           :value="dateFrom"
-          @input="$emit('update:dateFrom', $event.target.value)"
           :max="today"
           type="date"
-          class="form-control input input-bordered w-full" />
+          class="form-control input-bordered input h-auto w-full text-center"
+          @input="$emit('update:dateFrom', $event.target.value)"
+        >
       </div>
       <div class="form-control w-96 max-w-xs">
         <label class="label">
@@ -21,24 +29,19 @@
         </label>
         <input
           :value="dateTo"
-          @input="$emit('update:dateTo', $event.target.value)"
           :min="dateFrom"
           type="date"
-          class="form-control input input-bordered w-full" />
+          class="form-control input-bordered input h-auto w-full text-center"
+          @input="$emit('update:dateTo', $event.target.value)"
+        >
       </div>
     </fieldset>
     <button
       :disabled="!dateFrom || !dateTo"
-      class="btn btn-wide btn-secondary mt-8"
-      type="submit">
+      class="btn-secondary btn-wide btn mt-8"
+      type="submit"
+    >
       Submit
     </button>
   </form>
 </template>
-
-<script lang="ts">
-export default {
-  props: ['dateFrom', 'dateTo', 'today', 'onContinue'],
-  emits: ['update:dateFrom', 'update:dateTo'],
-}
-</script>

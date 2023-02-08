@@ -13,7 +13,7 @@ import { getDateTime } from '~/utils/time'
         <h2 class="text-xl font-bold mb-4">
           Use latest import
         </h2>
-        <div class="card mx-auto w-96 bg-gray-700 shadow-xl">
+        <div class="card mx-auto w-96 bg-gray-700 text-slate-300 shadow-xl">
           <div class="card-body p-6 text-left">
             <span>
               <IconExchange class="inline-block" />
