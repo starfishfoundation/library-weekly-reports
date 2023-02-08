@@ -8,6 +8,7 @@
     "semi": ["error", "never"],
     "quotes": ["error", "single"],
     "tailwindcss/no-custom-classname": "off",
+    "vue/component-tags-order": "off",
     "@typescript-eslint/semi": ["error", "never"],
     "@typescript-eslint/quotes": ["error", "single"],
     "@typescript-eslint/no-unsafe-argument": "off",
