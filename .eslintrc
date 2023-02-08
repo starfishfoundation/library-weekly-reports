@@ -5,7 +5,11 @@
   ],
   "plugins": ["tailwindcss"],
   "rules": {
+    "semi": ["error", "never"],
+    "quotes": ["error", "single"],
     "tailwindcss/no-custom-classname": "off",
+    "@typescript-eslint/semi": ["error", "never"],
+    "@typescript-eslint/quotes": ["error", "single"],
     "@typescript-eslint/no-unsafe-argument": "off",
     "@typescript-eslint/no-unsafe-assignment": "off",
     "@typescript-eslint/no-unsafe-call": "off",
