@@ -1,18 +1,18 @@
 import db from '~/db'
-import { getDate, getNextDate, getDayName, getDateExcelFormat } from '~/utils/time'
+import { getDate, getDateExcelFormat, getDayName, getNextDate } from '~/utils/time'
 
 interface ReportParams {
-  dateFrom: Date
-  dateTo: Date
+  dateFrom: Date;
+  dateTo: Date;
 }
 
 interface DayReport {
-  date: string
-  entries: any[]
-  status: {[k: string]: number}
-  language: {[k: string]: number}
-  audience: {[k: string]: number}
-  topic: {[k: string]: number}
+  date: string;
+  entries: any[];
+  status: { [k: string]: number };
+  language: { [k: string]: number };
+  audience: { [k: string]: number };
+  topic: { [k: string]: number };
 }
 
 const defaultDayReport: Partial<DayReport> = {
@@ -23,19 +23,19 @@ const defaultDayReport: Partial<DayReport> = {
     'New patron': 0,
   },
   language: {
-    'Farsi': 0,
-    'Arabic': 0,
-    'Somali': 0,
-    'French': 0,
-    'English': 0,
-    'German': 0,
-    'Greek': 0,
-    'Amharic': 0,
-    'Other': 0,
+    Farsi: 0,
+    Arabic: 0,
+    Somali: 0,
+    French: 0,
+    English: 0,
+    German: 0,
+    Greek: 0,
+    Amharic: 0,
+    Other: 0,
   },
   audience: {
-    'Adults': 0,
-    'Kids': 0,
+    Adults: 0,
+    Kids: 0,
   },
   topic: {
     'Fiction': 0,
@@ -77,10 +77,10 @@ export function prepareReport(params: ReportParams, data) {
     return []
   }
 
-  const perDate: {[date: string]: DayReport} = {}
+  const perDate: { [date: string]: DayReport } = {}
 
   // Step 1: Group by date
-  data.forEach(entry => {
+  data.forEach((entry) => {
     const date = getDate(entry.entryDate)
     perDate[date] = perDate[date] || {
       date,
@@ -92,7 +92,7 @@ export function prepareReport(params: ReportParams, data) {
 
   // Step 2: Calculate counts for each date
   for (const v of Object.values(perDate)) {
-    v.entries.forEach(entry => {
+    v.entries.forEach((entry) => {
       if (typeof v.status[entry.status] === 'undefined') {
         v.status[entry.status] = 0
       }
@@ -143,15 +143,64 @@ export function prepareReport(params: ReportParams, data) {
   }
 
   // Step 4: Convert to cells
-  const cells: any[] = []
-  const getWeekDay = dayReport => {
-    let wd = new Date(dayReport.date).getDay()
+  const cells: (number | string)[][] = []
+  const getWeekDay = (dayReport) => {
+    const wd = new Date(dayReport.date).getDay()
     return wd === 0 ? 7 : wd
   }
   let prevWeekDay = 0
-  dayReports.forEach(dr => {
+
+  const makeWeekTotalColumn = () => {
+    const sumFormula
+      // if week started from the middle, the total cannot start
+      // from 5 columns back but will throw an error instead
+      // e.g. if week is Wed-Thu-Fri, then total is placed at column 4 (i = 3),
+      // so sum should start from Math.min(3, 5) = 3 columns back
+      = `=SUM(INDIRECT("R[0]C[-${Math.min(cells.length, 5)}]:R[0]C[-1]"; FALSE))`
+
+    return [
+      '',
+      'Week total',
+      sumFormula,
+      '',
+      '',
+      sumFormula,
+      '',
+      sumFormula,
+      '',
+      sumFormula,
+      '',
+      '',
+      '',
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      '',
+      '',
+      '',
+      sumFormula,
+      sumFormula,
+      '',
+      '',
+      '',
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+      sumFormula,
+    ]
+  }
+
+  dayReports.forEach((dr) => {
     const d = new Date(dr.date)
     if (getWeekDay(dr) < prevWeekDay) {
+      cells.push(makeWeekTotalColumn())
       cells.push(Array(35).fill(''))
     }
 
@@ -162,9 +211,9 @@ export function prepareReport(params: ReportParams, data) {
         dr.status['Checked out'] || 0,
         '',
         '',
-        dr.status['Returned'] || 0,
+        dr.status.Returned || 0,
         '',
-        dr.status['Renewed'] || 0,
+        dr.status.Renewed || 0,
         '',
         dr.status['New patron'] || 0,
         '',
@@ -187,11 +236,11 @@ export function prepareReport(params: ReportParams, data) {
         '',
         '',
         '',
-        dr.topic['Fiction'] || 0,
+        dr.topic.Fiction || 0,
         dr.topic['Non fiction'] || 0,
         dr.topic['Educational/sciences'] || 0,
-        dr.topic['Languages'] || 0,
-        dr.topic['Other'] || 0,
+        dr.topic.Languages || 0,
+        dr.topic.Other || 0,
       ])
     } else if (getWeekDay(dr) <= 5) {
       cells.push([
@@ -204,6 +253,49 @@ export function prepareReport(params: ReportParams, data) {
 
     prevWeekDay = getWeekDay(dr)
   })
+
+  cells.push(makeWeekTotalColumn())
+  cells.push(Array(35).fill(''))
+  const sumFormula
+    // sum all columns that preceded this one
+    = `=SUM(INDIRECT("R[0]C[-${cells.length - 1}]:R[0]C[-1]"; FALSE))`
+  cells.push([
+    '',
+    'Total',
+    sumFormula,
+    '',
+    '',
+    sumFormula,
+    '',
+    sumFormula,
+    '',
+    sumFormula,
+    '',
+    '',
+    '',
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    '',
+    '',
+    '',
+    sumFormula,
+    sumFormula,
+    '',
+    '',
+    '',
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+    sumFormula,
+  ])
 
   return cells
 }
