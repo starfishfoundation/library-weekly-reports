@@ -251,8 +251,10 @@ export function prepareReport(params: ReportParams, data) {
   dayReports.forEach((dr) => {
     const d = new Date(dr.date)
     if (getWeekDay(dr) < prevWeekDay) {
-      sheet.addPartialSumColumn('Week total')
-      sheet.addEmptyColumn()
+      if (sheet.cells.length) {
+        sheet.addPartialSumColumn('Week total')
+        sheet.addEmptyColumn()
+      }
     }
 
     if (dr.entries.length) {
