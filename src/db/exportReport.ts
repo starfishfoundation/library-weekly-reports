@@ -72,6 +72,104 @@ export function prepareQuery(params: ReportParams) {
   }
 }
 
+class SheetMaker {
+  ROWS = 35
+
+  cells: (number | string)[][] = []
+  _partialIdxs: number[] = []
+
+  addColumn(data: (number | string)[]): number {
+    if (data.length !== this.ROWS) {
+      throw new Error(`Expected ${this.ROWS} values but received ${data.length} instead`)
+    }
+
+    return this.cells.push(data)
+  }
+
+  addDataColumn(data: (number | string)[]): number {
+    return this.addColumn(data)
+  }
+
+  addEmptyColumn() {
+    return this.addColumn(Array(35).fill(''))
+  }
+
+  _addFormulaColumn(title: string, formula: string) {
+    return this.addColumn([
+      '',
+      title,
+      formula,
+      '',
+      '',
+      formula,
+      '',
+      formula,
+      '',
+      formula,
+      '',
+      '',
+      '',
+      formula,
+      formula,
+      formula,
+      formula,
+      formula,
+      formula,
+      formula,
+      formula,
+      formula,
+      '',
+      '',
+      '',
+      formula,
+      formula,
+      '',
+      '',
+      '',
+      formula,
+      formula,
+      formula,
+      formula,
+      formula,
+    ])
+  }
+
+  addPartialSumColumn(title: string) {
+    let sumFormula = ''
+    if (this.cells.length) {
+      // if there is no previous partial, get all cells
+      let nLookBehind = this.cells.length
+      // if there is, get last partial index and subtract to get the look behind amount
+      nLookBehind -= this._partialIdxs.length ? this._partialIdxs[this._partialIdxs.length - 1] : 0
+      sumFormula = `=SUM(INDIRECT("R[0]C[-${nLookBehind}]:R[0]C[-1]"; FALSE))`
+    }
+
+    const idx = this._addFormulaColumn(title, sumFormula)
+    this._partialIdxs.push(idx)
+    return idx
+  }
+
+  addTotalSumColumn(title: string) {
+    const sumFormulas = []
+    let lastIdx = 0
+    for (const idx of this._partialIdxs) {
+      sumFormulas.push(
+        `SUM(INDIRECT("R[0]C[-${this.cells.length - lastIdx}]:R[0]C[-${this.cells.length - idx + 2}]"; FALSE))`,
+      )
+      lastIdx = idx
+    }
+
+    if (lastIdx < this.cells.length) {
+      sumFormulas.push(
+        `SUM(INDIRECT("R[0]C[-${this.cells.length - lastIdx}]:R[0]C[-1]"; FALSE))`,
+      )
+    }
+
+    const sumFormula = `=${sumFormulas.join(' + ')}`
+    return this._addFormulaColumn(title, sumFormula)
+  }
+}
+
 export function prepareReport(params: ReportParams, data) {
   if (!data.length) {
     return []
@@ -143,69 +241,22 @@ export function prepareReport(params: ReportParams, data) {
   }
 
   // Step 4: Convert to cells
-  const cells: (number | string)[][] = []
+  const sheet = new SheetMaker()
   const getWeekDay = (dayReport) => {
     const wd = new Date(dayReport.date).getDay()
     return wd === 0 ? 7 : wd
   }
   let prevWeekDay = 0
 
-  const makeWeekTotalColumn = () => {
-    const sumFormula
-      // if week started from the middle, the total cannot start
-      // from 5 columns back but will throw an error instead
-      // e.g. if week is Wed-Thu-Fri, then total is placed at column 4 (i = 3),
-      // so sum should start from Math.min(3, 5) = 3 columns back
-      = `=SUM(INDIRECT("R[0]C[-${Math.min(cells.length, 5)}]:R[0]C[-1]"; FALSE))`
-
-    return [
-      '',
-      'Week total',
-      sumFormula,
-      '',
-      '',
-      sumFormula,
-      '',
-      sumFormula,
-      '',
-      sumFormula,
-      '',
-      '',
-      '',
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      '',
-      '',
-      '',
-      sumFormula,
-      sumFormula,
-      '',
-      '',
-      '',
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-      sumFormula,
-    ]
-  }
-
   dayReports.forEach((dr) => {
     const d = new Date(dr.date)
     if (getWeekDay(dr) < prevWeekDay) {
-      cells.push(makeWeekTotalColumn())
-      cells.push(Array(35).fill(''))
+      sheet.addPartialSumColumn('Week total')
+      sheet.addEmptyColumn()
     }
 
     if (dr.entries.length) {
-      cells.push([
+      sheet.addDataColumn([
         getDateExcelFormat(d),
         getDayName(d),
         dr.status['Checked out'] || 0,
@@ -243,7 +294,7 @@ export function prepareReport(params: ReportParams, data) {
         dr.topic.Other || 0,
       ])
     } else if (getWeekDay(dr) <= 5) {
-      cells.push([
+      sheet.addDataColumn([
         getDateExcelFormat(d),
         getDayName(d),
         0,
@@ -254,50 +305,12 @@ export function prepareReport(params: ReportParams, data) {
     prevWeekDay = getWeekDay(dr)
   })
 
-  cells.push(makeWeekTotalColumn())
-  cells.push(Array(35).fill(''))
-  const sumFormula
-    // sum all columns that preceded this one
-    = `=SUM(INDIRECT("R[0]C[-${cells.length - 1}]:R[0]C[-1]"; FALSE))`
-  cells.push([
-    '',
-    'Total',
-    sumFormula,
-    '',
-    '',
-    sumFormula,
-    '',
-    sumFormula,
-    '',
-    sumFormula,
-    '',
-    '',
-    '',
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    '',
-    '',
-    '',
-    sumFormula,
-    sumFormula,
-    '',
-    '',
-    '',
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-    sumFormula,
-  ])
+  sheet.addPartialSumColumn('Week total')
+  sheet.addEmptyColumn()
 
-  return cells
+  sheet.addTotalSumColumn('Total')
+
+  return sheet.cells
 }
 
 export async function exportReport(params: ReportParams) {
