@@ -218,8 +218,8 @@ export function prepareReport(params: ReportParams, data) {
 
   // Step 3: Fill dates in-between
   const dayReports: DayReport[] = []
-  const dateFirst = Object.values(perDate)[0].date
-  const dateLast = Object.values(perDate)[Object.keys(perDate).length - 1].date
+  const dateFirst = getDate(params.dateFrom)
+  const dateLast = getDate(params.dateTo)
   let date = dateFirst
   while (true) {
     if (perDate[date]) {
