@@ -8,6 +8,10 @@ const routes: RouteRecordRaw[] = [
     component: () => import("~/views/home/index.vue"),
   },
   {
+    path: "/exporter",
+    component: () => import("~/views/exporter/index.vue"),
+  },
+  {
     path: "/404",
     name: "ErrorPage",
     component: () => import("~/views/errorPages/index.vue"),
