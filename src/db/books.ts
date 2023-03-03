@@ -106,7 +106,7 @@ export async function parseBooks(file, opts: ParseOptions) {
   const getAudience = entry => {
     let err
     const mapping = normalizeMapping({
-      Adults: ['Adults', 'Adult', 'Adults fiction'],
+      Adults: ['Adults', 'Adult', 'Adults fiction', 'Farsi adults fiction'],
       Kids: ['Kids', 'Teen', 'Farsi kids fiction'],
     })
 
